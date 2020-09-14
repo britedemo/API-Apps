@@ -1,6 +1,7 @@
-if(window.self !== window.top) {
+if (window.self !== window.top) {
     //Remove the copyright if in an iFrame on localhost or britecore domain
     if ((window.location.href.indexOf("localhost:8000") > -1) || (window.location.href.indexOf("127.0.0.1:8000") > -1) || (window.location.href.indexOf("britecore") > -1)) {
+        console.log(window.location.href);
         document.getElementById("copyright").innerHTML = "";
     }
 }
