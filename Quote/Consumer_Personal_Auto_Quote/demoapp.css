@@ -1,0 +1,9 @@
+.btn-outline-info:not(:disabled):not(.disabled).active, .btn-outline-info:hover, .btn-outline-info:active, .btn-outline-info:visited {
+    color: #fefefe; !important;
+    background-color: #306391; !important;
+    border-color: #306391; !important;
+}
+.btn-outline-info {
+    color: #306391; !important;
+    border-color: #306391; !important;
+}

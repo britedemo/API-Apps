@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <style type="text/css">
+            [v-cloak] {
+                display:none;
+            }
+        </style>
+        <link rel="icon" type="image/png"  href="https://demo.britecore.com/static/apps/logo.png">
+        <link rel="apple-touch-icon" href="https://demo.britecore.com/static/apps/logo.png"/>
+        <title>Find an Agent</title>
+    </head>
+    <body>
+        <script type='text/javascript'>
+            var site_url = "http://127.0.0.1:8000";
+            var site_token = "07f5fc73d8368af36dcf556a785f201dc8a75bdd";
+            var site_token_type = "Token";
+        </script>
+
+        <div id="demoapp" v-cloak>
+            <div class="form-group w-25 mx-auto mb-3">
+                <label>Zip Code:</label><input type="text" class="form-control" id="zipCode" placeholder="02110"><br>
+                <label>Max Distance (in miles):</label><input type="text" class="form-control" id="maxDistance" placeholder="50"><br>
+                <label>Number of results to display:</label><input type="text" class="form-control" id="maxResults" placeholder="10"><br>
+            </div>
+            <center><button class="btn btn-primary" @click="findAgencies">Find an Agent</button></center>
+            <br><br>
+            <section v-if="errored">
+                <center>An error occured while trying to retrieve the information.<br>Please try again.</center>
+            </section>
+            <section v-else>
+                <div v-if="loading"><center>Looking for Agents...</center></div>
+                <div v-else>
+                    <center>[[message]]</center><br><br>
+                    <div class="w-25 mx-auto mb-3">
+                        <div class="card-deck justify-content-center">
+                            <div v-for="agency in agencies">
+                                <div class="card text-center" style="width: 20rem;">
+                                    <div class="card-header">
+                                        <b>[[agency.name]]</b>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text">
+                                            [[agency.addressLine1]]<br>
+                                            [[agency.city]] [[agency.state]], [[agency.zip]]<br>
+                                            <span v-if="agency.telephone">[[agency.telephone]]<br></span>
+                                            [[agency.distance]] miles<br><br>
+                                            <span v-if="agency.website"><a :href="agency.website" class="card-link" target="_blank">Website</a>&nbsp;&nbsp;</span>
+                                            <a :href="getMapLink(agency.addressLine1, agency.city, agency.state, agency.zip)" class="card-link" target="_blank">View on Map</a>
+                                        </p>
+                                    </div>
+                                </div><br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="map_wrapper">
+                    <div id="map_canvas" class="mapping"></div>
+                </div>
+            </section>
+        </div>
+        <br><br>
+        <!-- Copyright -->
+        <footer id="copyright"class="footer fixed-bottom container">
+            <div class="footer-copyright text-center bg-white py-2">
+                <small class="text-muted">Powered by BriteDemo. &copy; <script>document.write(new Date().getFullYear())</script> BriteCore. All Rights Reserved.</small><br>
+            </div>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/vue/dist/vue.js"></script>
+        <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script type='text/javascript' src="demoapp.js"></script>
+    </body>
+</html>
