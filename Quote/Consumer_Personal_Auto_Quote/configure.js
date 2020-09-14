@@ -20,6 +20,7 @@ if (session != '') {
         'Content-Type': 'application/json',
         'Authorization': 'Token ' + session
     };
+    window.history.replaceState(null, null, window.location.pathname);
 }
 
 if (site_url === '' || apiKey === '' || auth_type === '') {
