@@ -1,44 +1,56 @@
 // This is a configuration file to override the default API authentication behavior.
 // If the values are left empty, then automatic authentication will occur using the
 // currently logged in user on BriteDemo. If you wish to manually override this to
-// use the demo application in your own code, simply enter your API key and auth
-// type and the site URL below.
+// use the demo application in your own code, simply enter your BriteDemo API key
+// and with an auth type of 'Token' and the site URL below.
 
-const site_url = '';
-const apiKey = '';
-const auth_type = '';
 
-// Get user session info - do not modify
+var apiKey = ''; // Set your BriteDemo API key here
+var auth_type = 'Token';
+
+
+// Get user session info - DO NOT MODIFY CODE BELOW THIS LINE
+var urlParams = new URLSearchParams(window.location.search);
+var headers = null;
+session = urlParams.get('session');
+if (session != '') {
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Token ' + session
+    };
+}
+
 if (site_url === '' || apiKey === '' || auth_type === '') {
     axios
-        .get('https://demo.britecore.com/api/demo/auth/session/')
+        // Try the main site
+        .get('https://demo.britecore.com/api/demo/auth/session/', {"headers" : headers})
         .then(response => {
             console.log(response.data);
             if (site_url === '') {
-                site_url = response.data['site_url'];
+                this.site_url = response.data['site_url'];
             }
             if (apiKey === '') {
-                apiKey = response.data['apiKey'];
+                this.apiKey = response.data['apiKey'];
             }
             if (auth_type === '') {
-                auth_type = response.data['auth_type'];
+                this.auth_type = response.data['auth_type'];
             }
         })
         .catch(error => {
             console.log(error);
             // Try local instance instead
             axios
-                .get('http://127.0.0.1:8000/api/demo/auth/session/')
+                .get('http://127.0.0.1:8000/api/demo/auth/session/', {"headers" : headers})
                 .then(response => {
                     console.log(response.data);
                     if (site_url === '') {
-                        site_url = response.data['site_url'];
+                        this.site_url = response.data['site_url'];
                     }
                     if (apiKey === '') {
-                        apiKey = response.data['apiKey'];
+                        this.apiKey = response.data['apiKey'];
                     }
                     if (auth_type === '') {
-                        auth_type = response.data['auth_type'];
+                        this.auth_type = response.data['auth_type'];
                     }
                 })
                 .catch(error => {
