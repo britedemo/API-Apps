@@ -1,3 +1,10 @@
+if(window.self !== window.top) {
+    //Remove the copyright if in an iFrame on localhost or britecore domain
+    if ((window.location.href.indexOf("localhost:8000") > -1) || (window.location.href.indexOf("127.0.0.1:8000") > -1) ||  (window.location.href.indexOf("204.236.220.13") > -1) || (window.location.href.indexOf("britecore") > -1)) {
+        document.getElementById("copyright").innerHTML = "";
+    }
+}
+
 var session = {
     zip_code: null,
     effective_date: null,
@@ -72,12 +79,33 @@ var formatter = new Intl.NumberFormat('en-US', {
 
 var numberFormat = new Intl.NumberFormat();
 
+// Get user session info
+if (site_url == '' || apiKey == '' || auth_type == '') {
+    axios
+        .get('https://demo.britecore.com/api/demo/auth/session/')
+        .then(response => {
+            console.log(response.data);
+            if (site_url == '') {
+                site_url = response.data['site_url'];
+            }
+            if (apiKey == '') {
+                apiKey = response.data['apiKey'];
+            }
+            if (auth_type == '') {
+                auth_type = response.data['auth_type'];
+            }
+        })
+        .catch(error => {
+            console.log(error);
+        })
+}
+
 const apiClient = axios.create({
   baseURL: site_url,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    'Authorization': site_token_type + ' ' + site_token
+    'Authorization': auth_type + ' ' + apiKey
   }
 });
 
@@ -131,11 +159,11 @@ const Effective = {
             payload = JSON.stringify({
                 "zip": session.zip_code
             });
-            parent.console.log('POST: ' + '/api/v1/contacts/retrieveAddressInfoFromZip');
-            parent.console.log('PAYLOAD: ' + payload);
+            console.log('POST: ' + '/api/v1/contacts/retrieveAddressInfoFromZip');
+            console.log('PAYLOAD: ' + payload);
             apiClient.post('/api/v1/contacts/retrieveAddressInfoFromZip', payload)
                 .then(response => {
-                    parent.console.log(response.data);
+                    console.log(response.data);
                     session.address_info = response.data;
                     for (var key in session.address_info) {
                         // Store the city and state for later
@@ -164,7 +192,7 @@ const Effective = {
                     document.getElementById("effectiveDate").setAttribute("min", session.today);
                 })
                 .catch(error => {
-                    parent.console.log('There was an error:', error.response);
+                    console.log('There was an error:', error.response);
                 });
         }
     },
@@ -258,10 +286,10 @@ const Products = {
     `,
     mounted() {
         document.getElementById('quoteHeader').innerHTML = "<h5>Looking for available coverages in " + session.city + ', ' + session.state + "...</h5><br><br><i class=\"fa fa-spinner fa-pulse fa-4x fa-fw\"></i>";
-        parent.console.log('GET: ' + '/api/quote/quotable-products/');
+        console.log('GET: ' + '/api/quote/quotable-products/');
         apiClient.get('/api/quote/quotable-products/')
             .then(response => {
-                parent.console.log(response.data);
+                console.log(response.data);
                 session.quotable_products = response.data;
                 if (session.quotable_products !== null) {
                     document.getElementById('quoteHeader').innerHTML = "<h5>What type of insurance coverage do you need?</h5><br>";
@@ -295,7 +323,7 @@ const Products = {
 
             })
             .catch(error => {
-                parent.console.log('There was an error:', error.response);
+                console.log('There was an error:', error.response);
             });
     },
     methods: {
@@ -312,17 +340,17 @@ const Products = {
                 "expiration_date": session.expiration_date,
                 "product_name": session.selected_product,
             });
-            parent.console.log('POST: ' + '/api/quote/');
-            parent.console.log('PAYLOAD: ' + payload);
+            console.log('POST: ' + '/api/quote/');
+            console.log('PAYLOAD: ' + payload);
             apiClient.post('/api/quote/', payload)
                 .then(response => {
-                    parent.console.log(response.data);
+                    console.log(response.data);
                     session.quote_info = response.data;
                     session.quote_number = session.quote_info['quote_number'];
                     this.$router.push('/contact');
                 })
                 .catch(error => {
-                    parent.console.log('There was an error:', error.response);
+                    console.log('There was an error:', error.response);
                 });
         }
     }
@@ -361,14 +389,14 @@ const Contact = {
         document.getElementById('contactEmail').value = session.contact_email;
 
         // Get policy risk types
-        parent.console.log('GET: ' + '/api/lines/products/' + session.selected_product + '/risk-types/policy/state/?version_id=' + session.product_version_id + '&type=minimal');
+        console.log('GET: ' + '/api/lines/products/' + session.selected_product + '/risk-types/policy/state/?version_id=' + session.product_version_id + '&type=minimal');
         apiClient.get('/api/lines/products/' + session.selected_product + '/risk-types/policy/state/?version_id=' + session.product_version_id + '&type=minimal')
             .then(response => {
-                parent.console.log(response.data);
+                console.log(response.data);
                 session.policy_risk_types = response.data;
             })
             .catch(error => {
-                parent.console.log('There was an error:', error.response);
+                console.log('There was an error:', error.response);
             });
     },
     methods: {
@@ -544,14 +572,14 @@ const Drivers = {
         }
 
         // Get product risk types for drivers
-        parent.console.log('GET: ' + '/api/lines/products/' + session.selected_product + '/risk-types/drivers/state/?version_id=' + session.product_version_id + '&type=minimal');
+        console.log('GET: ' + '/api/lines/products/' + session.selected_product + '/risk-types/drivers/state/?version_id=' + session.product_version_id + '&type=minimal');
         apiClient.get('/api/lines/products/' + session.selected_product + '/risk-types/drivers/state/?version_id=' + session.product_version_id + '&type=minimal')
             .then(response => {
-                parent.console.log(response.data);
+                console.log(response.data);
                 session.driver_risk_types = response.data;
             })
             .catch(error => {
-                parent.console.log('There was an error:', error.response);
+                console.log('There was an error:', error.response);
             });
     },
     methods: {
@@ -888,14 +916,14 @@ const Vehicles = {
         }
 
         // Get product risk types for vehicles
-        parent.console.log('GET: ' + '/api/lines/products/' + session.selected_product + '/risk-types/vehicles/state/?version_id=' + session.product_version_id + '&type=minimal');
+        console.log('GET: ' + '/api/lines/products/' + session.selected_product + '/risk-types/vehicles/state/?version_id=' + session.product_version_id + '&type=minimal');
         apiClient.get('/api/lines/products/' + session.selected_product + '/risk-types/vehicles/state/?version_id=' + session.product_version_id + '&type=minimal')
             .then(response => {
-                parent.console.log(response.data);
+                console.log(response.data);
                 session.vehicle_risk_types = response.data;
             })
             .catch(error => {
-                parent.console.log('There was an error:', error.response);
+                console.log('There was an error:', error.response);
             });
     },
     methods: {
@@ -1115,10 +1143,10 @@ const Coverages = {
     `,
     mounted() {
         // Get quote risks
-        parent.console.log('GET: ' + '/api/quote/' + session.quote_number + '/risks/?page=1');
+        console.log('GET: ' + '/api/quote/' + session.quote_number + '/risks/?page=1');
         apiClient.get('/api/quote/' + session.quote_number + '/risks/?page=1')
             .then(response => {
-                parent.console.log(response.data);
+                console.log(response.data);
                 session.quote_risks = response.data;
                 document.getElementById('policyCoveragesGroup').style.display = "block";
                 document.getElementById('vehicleCoveragesGroup').style.display = "block";
@@ -1138,7 +1166,7 @@ const Coverages = {
                 }
             })
             .catch(error => {
-                parent.console.log('There was an error:', error.response);
+                console.log('There was an error:', error.response);
                 document.getElementById('quoteHeader').innerHTML = "<h5>There was an error when trying to complete your request.</h5>";
                 document.getElementById('policyCoveragesGroup').style.display = "none";
                 document.getElementById('vehicleCoveragesGroup').style.display = "none";
@@ -1189,11 +1217,11 @@ const Coverages = {
             delete quote_risks_copy.meta;
 
             payload = JSON.stringify(quote_risks_copy, existing_payload);
-            parent.console.log('PUT: ' + '/api/quote/risks/' + risk_id + '/');
-            parent.console.log('PAYLOAD: ' + payload);
+            console.log('PUT: ' + '/api/quote/risks/' + risk_id + '/');
+            console.log('PAYLOAD: ' + payload);
             apiClient.put('/api/quote/risks/' + risk_id + '/', payload)
                 .then(response => {
-                    parent.console.log(response.data);
+                    console.log(response.data);
                     session.update_quote_risks_response = response.data;
                     if (session.add_vehicle_risk_response != null && vehicle == true) {
                         if(existing_payload != null && existing_payload != '') {
@@ -1205,7 +1233,7 @@ const Coverages = {
                     }
                 })
                 .catch(error => {
-                    parent.console.log('There was an error:', error.response);
+                    console.log('There was an error:', error.response);
                 });
         },
         addDriverRisk: function(vehicle) {
@@ -1215,11 +1243,11 @@ const Coverages = {
                 "parent_risk_quote": session.quote_info['root_risk_quote_id'],
                 "risk_type_name": "drivers"
             });
-            parent.console.log('POST: ' + '/api/quote/risks/');
-            parent.console.log('PAYLOAD: ' + payload);
+            console.log('POST: ' + '/api/quote/risks/');
+            console.log('PAYLOAD: ' + payload);
             apiClient.post('/api/quote/risks/', payload)
                 .then(response => {
-                    parent.console.log(response.data);
+                    console.log(response.data);
                     session.add_driver_risk_response = response.data;
                     session.driver_name_id = session.add_driver_risk_response.risk_state['meta'].static_id;
                     if (session.add_vehicle_risk_response == null && vehicle == true) {
@@ -1227,7 +1255,7 @@ const Coverages = {
                     }
                 })
                 .catch(error => {
-                    parent.console.log('There was an error:', error.response);
+                    console.log('There was an error:', error.response);
                     document.getElementById('quoteHeader').innerHTML = "<h5>There was an error when trying to complete your request.</h5>";
                     document.getElementById('policyCoveragesGroup').style.display = "none";
                     document.getElementById('vehicleCoveragesGroup').style.display = "none";
@@ -1261,18 +1289,18 @@ const Coverages = {
             delete risk_type_response_copy.meta;
 
             payload = JSON.stringify(risk_type_response_copy);
-            parent.console.log('PUT: ' + '/api/quote/risks/' + risk_id + '/');
-            parent.console.log('Payload: ' + payload);
+            console.log('PUT: ' + '/api/quote/risks/' + risk_id + '/');
+            console.log('PAYLOAD: ' + payload);
             apiClient.put('/api/quote/risks/' + risk_id + '/', payload)
                 .then(response => {
-                    parent.console.log(response.data);
+                    console.log(response.data);
                     session.update_driver_risk_response = response.data;
                     if (session.add_vehicle_risk_response != null && vehicle == true) {
                         this.updateVehicleRisk();
                     }
                 })
                 .catch(error => {
-                    parent.console.log('There was an error:', error.response);
+                    console.log('There was an error:', error.response);
                     document.getElementById('quoteHeader').innerHTML = "<h5>There was an error when trying to complete your request.</h5>";
                     document.getElementById('policyCoveragesGroup').style.display = "none";
                     document.getElementById('vehicleCoveragesGroup').style.display = "none";
@@ -1288,18 +1316,18 @@ const Coverages = {
                 "parent_risk_quote": session.quote_info['root_risk_quote_id'],
                 "risk_type_name": "vehicles"
             });
-            parent.console.log('POST: ' + '/api/quote/risks/');
-            parent.console.log('PAYLOAD: ' + payload);
+            console.log('POST: ' + '/api/quote/risks/');
+            console.log('PAYLOAD: ' + payload);
             apiClient.post('/api/quote/risks/', payload)
                 .then(response => {
-                    parent.console.log(response.data);
+                    console.log(response.data);
                     session.add_vehicle_risk_response = response.data;
                     if (session.update_driver_risk_response == null && driver == true) {
                         this.updateDriverRisk(true);
                     }
                 })
                 .catch(error => {
-                    parent.console.log('There was an error:', error.response);
+                    console.log('There was an error:', error.response);
                     document.getElementById('quoteHeader').innerHTML = "<h5>There was an error when trying to complete your request.</h5>";
                     document.getElementById('policyCoveragesGroup').style.display = "none";
                     document.getElementById('vehicleCoveragesGroup').style.display = "none";
@@ -1392,11 +1420,11 @@ const Coverages = {
                 payload = JSON.stringify(risk_type_response_copy);
             }
 
-            parent.console.log('PUT: ' + '/api/quote/risks/' + risk_id + '/');
-            parent.console.log('Payload: ' + payload);
+            console.log('PUT: ' + '/api/quote/risks/' + risk_id + '/');
+            console.log('PAYLOAD: ' + payload);
             apiClient.put('/api/quote/risks/' + risk_id + '/', payload)
                 .then(response => {
-                    parent.console.log(response.data);
+                    console.log(response.data);
                     session.update_vehicle_risk_response = response.data;
                     document.getElementById('totalUninsuredMotorist').innerHTML = formatter.format(session.update_vehicle_risk_response.risk_state['items'].uninsuredMotorist['premium']);
                     document.getElementById('bodilyInjuryTotal').innerHTML = formatter.format(session.update_vehicle_risk_response.risk_state['items'].bodilyInjury['premium']);
@@ -1417,7 +1445,7 @@ const Coverages = {
                     document.getElementById('continueBttn').disabled = false;
                 })
                 .catch(error => {
-                    parent.console.log('There was an error:', error.response);
+                    console.log('There was an error:', error.response);
                     document.getElementById('quoteHeader').innerHTML = "<h5>There was an error when trying to complete your request.</h5>";
                     document.getElementById('policyCoveragesGroup').style.display = "none";
                     document.getElementById('vehicleCoveragesGroup').style.display = "none";
@@ -1478,11 +1506,11 @@ const Coverages = {
                         "risk_quote": session.add_vehicle_risk_response.id,
                         "risk_item_name": "comprehensive"
                     });
-                    parent.console.log('POST: ' + '/api/quote/items/');
-                    parent.console.log('PAYLOAD: ' + payload);
+                    console.log('POST: ' + '/api/quote/items/');
+                    console.log('PAYLOAD: ' + payload);
                     apiClient.post('/api/quote/items/', payload)
                         .then(response => {
-                            parent.console.log(response.data);
+                            console.log(response.data);
                             session.add_comprehensive_response = response.data;
                             // Update amounts and total
                             document.getElementById('comprehensiveTotal').innerHTML = formatter.format(session.add_comprehensive_response.risk_state['items'].comprehensive['premium']);
@@ -1491,7 +1519,7 @@ const Coverages = {
                             }
                         })
                         .catch(error => {
-                            parent.console.log('There was an error:', error.response);
+                            console.log('There was an error:', error.response);
                         });
                 } else if (document.getElementById('comprehensiveCheckbox').checked == false) {
                     document.getElementById('comprehensiveTotal').innerHTML = "---";
@@ -1506,11 +1534,11 @@ const Coverages = {
                             'Data': JSON.stringify(data)
                         }
                     }
-                    parent.console.log('DELETE: ' + '/api/quote/items/comprehensive/');
-                    parent.console.log('PAYLOAD: ' + JSON.stringify(data));
+                    console.log('DELETE: ' + '/api/quote/items/comprehensive/');
+                    console.log('PAYLOAD: ' + JSON.stringify(data));
                     axios.delete(site_url + '/api/quote/items/comprehensive/', config)
                         .then(response => {
-                            parent.console.log(response.data);
+                            console.log(response.data);
                             session.remove_comprehensive_response = response.data;
                             // Update amounts and total
                             if (session.add_vehicle_risk_response != null) {
@@ -1518,7 +1546,7 @@ const Coverages = {
                             }
                         })
                         .catch(error => {
-                            parent.console.log('There was an error:', error.response);
+                            console.log('There was an error:', error.response);
                         });
                 }
             } else if (coverage_type === 'collision') {
@@ -1530,11 +1558,11 @@ const Coverages = {
                         "risk_quote": session.add_vehicle_risk_response.id,
                         "risk_item_name": "collision"
                     });
-                    parent.console.log('POST: ' + '/api/quote/items/');
-                    parent.console.log('PAYLOAD: ' + payload);
+                    console.log('POST: ' + '/api/quote/items/');
+                    console.log('PAYLOAD: ' + payload);
                     apiClient.post('/api/quote/items/', payload)
                         .then(response => {
-                            parent.console.log(response.data);
+                            console.log(response.data);
                             session.add_collision_response = response.data;
                             // Update amounts and total
                             document.getElementById('collisionTotal').innerHTML = formatter.format(session.add_collision_response.risk_state['items'].collision['premium']);
@@ -1543,7 +1571,7 @@ const Coverages = {
                             }
                         })
                         .catch(error => {
-                            parent.console.log('There was an error:', error.response);
+                            console.log('There was an error:', error.response);
                         });
                 } else if (document.getElementById('collisionCheckbox').checked == false) {
                     document.getElementById('collisionTotal').innerHTML = "---";
@@ -1558,11 +1586,11 @@ const Coverages = {
                             'Data': JSON.stringify(data)
                         }
                     }
-                    parent.console.log('DELETE: ' + '/api/quote/items/collision/');
-                    parent.console.log('PAYLOAD: ' + JSON.stringify(data));
+                    console.log('DELETE: ' + '/api/quote/items/collision/');
+                    console.log('PAYLOAD: ' + JSON.stringify(data));
                     axios.delete(site_url + '/api/quote/items/collision/', config)
                         .then(response => {
-                            parent.console.log(response.data);
+                            console.log(response.data);
                             session.remove_collision_response = response.data;
                             // Update amounts and total
                             if (session.add_vehicle_risk_response != null) {
@@ -1570,7 +1598,7 @@ const Coverages = {
                             }
                         })
                         .catch(error => {
-                            parent.console.log('There was an error:', error.response);
+                            console.log('There was an error:', error.response);
                         });
                 }
             } else if (coverage_type === 'additional') {
@@ -1583,11 +1611,11 @@ const Coverages = {
                         "risk_quote": session.add_vehicle_risk_response.id,
                         "risk_item_name": "additionalEquipment"
                     });
-                    parent.console.log('POST: ' + '/api/quote/items/');
-                    parent.console.log('PAYLOAD: ' + payload);
+                    console.log('POST: ' + '/api/quote/items/');
+                    console.log('PAYLOAD: ' + payload);
                     apiClient.post('/api/quote/items/', payload)
                         .then(response => {
-                            parent.console.log(response.data);
+                            console.log(response.data);
                             session.add_additional_equipment_response = response.data;
                             // Update amounts and total
                             if (session.add_vehicle_risk_response != null) {
@@ -1595,7 +1623,7 @@ const Coverages = {
                             }
                         })
                         .catch(error => {
-                            parent.console.log('There was an error:', error.response);
+                            console.log('There was an error:', error.response);
                         });
                 } else if (document.getElementById('additionalCheckbox').checked == false) {
                     document.getElementById('additionalEquipmentCoverageLimit').disabled = true;
@@ -1611,11 +1639,11 @@ const Coverages = {
                             'Data': JSON.stringify(data)
                         }
                     }
-                    parent.console.log('DELETE: ' + '/api/quote/items/additionalequipment/');
-                    parent.console.log('PAYLOAD: ' + JSON.stringify(data));
+                    console.log('DELETE: ' + '/api/quote/items/additionalequipment/');
+                    console.log('PAYLOAD: ' + JSON.stringify(data));
                     axios.delete(site_url + '/api/quote/items/additionalEquipment/', config)
                         .then(response => {
-                            parent.console.log(response.data);
+                            console.log(response.data);
                             session.remove_additional_equipment_response = response.data;
                             // Update amounts and total
                             if (session.add_vehicle_risk_response != null) {
@@ -1623,7 +1651,7 @@ const Coverages = {
                             }
                         })
                         .catch(error => {
-                            parent.console.log('There was an error:', error.response);
+                            console.log('There was an error:', error.response);
                         });
                 }
             } else if (coverage_type === 'transportation') {
@@ -1636,11 +1664,11 @@ const Coverages = {
                         "risk_quote": session.add_vehicle_risk_response.id,
                         "risk_item_name": "transportationExpenses"
                     });
-                    parent.console.log('POST: ' + '/api/quote/items/');
-                    parent.console.log('PAYLOAD: ' + payload);
+                    console.log('POST: ' + '/api/quote/items/');
+                    console.log('PAYLOAD: ' + payload);
                     apiClient.post('/api/quote/items/', payload)
                         .then(response => {
-                            parent.console.log(response.data);
+                            console.log(response.data);
                             session.add_transportation_response = response.data;
                             // Update amounts and total
                             if (session.add_vehicle_risk_response != null) {
@@ -1648,7 +1676,7 @@ const Coverages = {
                             }
                         })
                         .catch(error => {
-                            parent.console.log('There was an error:', error.response);
+                            console.log('There was an error:', error.response);
                         });
                 } else if (document.getElementById('transportationCheckbox').checked == false) {
                     document.getElementById('transportationExpensesLimit').disabled = true;
@@ -1664,11 +1692,11 @@ const Coverages = {
                             'Data': JSON.stringify(data)
                         }
                     }
-                    parent.console.log('DELETE: ' + '/api/quote/items/transportationExpenses/');
-                    parent.console.log('PAYLOAD: ' + JSON.stringify(data));
+                    console.log('DELETE: ' + '/api/quote/items/transportationExpenses/');
+                    console.log('PAYLOAD: ' + JSON.stringify(data));
                     axios.delete(site_url + '/api/quote/items/transportationExpenses/', config)
                         .then(response => {
-                            parent.console.log(response.data);
+                            console.log(response.data);
                             session.remove_transportation_response = response.data;
                             // Update amounts and total
                             if (session.add_vehicle_risk_response != null) {
@@ -1676,7 +1704,7 @@ const Coverages = {
                             }
                         })
                         .catch(error => {
-                            parent.console.log('There was an error:', error.response);
+                            console.log('There was an error:', error.response);
                         });
                 }
             } else if (coverage_type === 'towing') {
@@ -1689,11 +1717,11 @@ const Coverages = {
                         "risk_quote": session.add_vehicle_risk_response.id,
                         "risk_item_name": "towing"
                     });
-                    parent.console.log('POST: ' + '/api/quote/items/');
-                    parent.console.log('PAYLOAD: ' + payload);
+                    console.log('POST: ' + '/api/quote/items/');
+                    console.log('PAYLOAD: ' + payload);
                     apiClient.post('/api/quote/items/', payload)
                         .then(response => {
-                            parent.console.log(response.data);
+                            console.log(response.data);
                             session.add_towing_response = response.data;
                             // Update amounts and total
                             if (session.add_vehicle_risk_response != null) {
@@ -1701,7 +1729,7 @@ const Coverages = {
                             }
                         })
                         .catch(error => {
-                            parent.console.log('There was an error:', error.response);
+                            console.log('There was an error:', error.response);
                         });
                 } else if (document.getElementById('towingCheckbox').checked == false) {
                     document.getElementById('towingLimit').disabled = true;
@@ -1717,11 +1745,11 @@ const Coverages = {
                             'Data': JSON.stringify(data)
                         }
                     }
-                    parent.console.log('DELETE: ' + '/api/quote/items/towing/');
-                    parent.console.log('PAYLOAD: ' + JSON.stringify(data));
+                    console.log('DELETE: ' + '/api/quote/items/towing/');
+                    console.log('PAYLOAD: ' + JSON.stringify(data));
                     axios.delete(site_url + '/api/quote/items/towing/', config)
                         .then(response => {
-                            parent.console.log(response.data);
+                            console.log(response.data);
                             session.remove_towing_response = response.data;
                             // Update amounts and total
                             if (session.add_vehicle_risk_response != null) {
@@ -1729,7 +1757,7 @@ const Coverages = {
                             }
                         })
                         .catch(error => {
-                            parent.console.log('There was an error:', error.response);
+                            console.log('There was an error:', error.response);
                         });
                 }
             }
@@ -2048,7 +2076,7 @@ const Summary = {
             document.getElementById('submitNav').style.display = "none";
             apiClient.post('/api/quote/' + session.quote_number + '/submit/')
                 .then(response => {
-                    parent.console.log(response.data);
+                    console.log(response.data);
                     session.submit_response = response.data;
                     document.getElementById('quoteHeader').innerHTML = "<h4>Thank you for your submission!</h4><br><br><span class=\"text-muted\">Someone will contact you shortly regarding your personal auto quote.</span><br><br>";
                     document.getElementById('policyInfoGroup').style.display = "block";
@@ -2056,7 +2084,7 @@ const Summary = {
                     document.getElementById('printNav').style.display = "block";
                 })
                 .catch(error => {
-                    parent.console.log('There was an error:', error.response);
+                    console.log('There was an error:', error.response);
                     document.getElementById('quoteHeader').innerHTML = "<h5>There was an error completing your request.</h5>";
                 });
         },
