@@ -4,8 +4,10 @@
 // use the demo application in your own code, simply enter your BriteDemo API key
 // and with an auth type of 'Token' and the site URL below.
 
+var site_url = 'https://demo.britecore.com';
 
 var apiKey = ''; // Set your BriteDemo API key here
+
 var auth_type = 'Token';
 
 
