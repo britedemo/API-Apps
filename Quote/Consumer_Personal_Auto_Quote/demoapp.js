@@ -77,14 +77,7 @@ var formatter = new Intl.NumberFormat('en-US', {
 
 var numberFormat = new Intl.NumberFormat();
 
-const apiClient = axios.create({
-  baseURL: site_url,
-  headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'Authorization': auth_type + ' ' + apiKey
-  }
-});
+apiClient = createAPIClient();
 
 const Start = {
     template: `

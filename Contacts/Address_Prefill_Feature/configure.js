@@ -14,13 +14,21 @@ var auth_type = 'Token';
 // Get user session info - DO NOT MODIFY CODE BELOW THIS LINE
 var urlParams = new URLSearchParams(window.location.search);
 var headers = null;
-session = urlParams.get('session');
-if (session != '') {
+var session = urlParams.get('session');
+if (session != null) {
     headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Token ' + session
     };
     window.history.replaceState(null, null, window.location.pathname);
+} else {
+  // Get user session from referring url instead
+  var urlParams2 = new URLSearchParams(window.frames['document'].referrer);
+  session = urlParams2.get('session');
+  headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Token ' + session
+  };
 }
 
 if (site_url === '' || apiKey === '' || auth_type === '') {
