@@ -86,14 +86,14 @@
                 <div v-else>
                     <div class="form-group w-50 mx-auto mb-3">
                         <label>City:</label>
-                        <select v-model="city" class="form-control" id="citiesSelect">
-                            <option v-for="city in cities" :key="city.id" v-bind:value="city.id">
+                        <select v-model="cityList" class="form-control" id="citiesSelect">
+                            <option v-for="city in cities">
                                 [[city]]
                             </option>
                         </select><br>
                         <label>County:</label>
-                        <select v-model="county" class="form-control" id="countiesSelect">
-                            <option v-for="county in counties" :key="county.id" v-bind:value="county.id">
+                        <select v-model="countyList" class="form-control" id="countiesSelect">
+                            <option v-for="county in counties">
                                 [[county.name]]
                             </option>
                         </select>

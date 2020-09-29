@@ -9,6 +9,8 @@ new Vue({
         data () {
             return {
                 cities: null,
+                cityList: '',
+                countyList: '',
                 counties: null,
                 latitude: null,
                 longitude: null,
@@ -40,6 +42,11 @@ new Vue({
                     this.longitude = response.data['location'].longitude;
                     // Log the JSON response
                     console.log(response.data);
+                    // Set default values for cities and counties
+                    var cityString = this.cities[0];
+                    var countyString = this.counties[0].name;
+                    this.cityList = cityString.toString();
+                    this.countyList = countyString.toString();
                     })
                     .catch(error => {
                         console.log(error);
