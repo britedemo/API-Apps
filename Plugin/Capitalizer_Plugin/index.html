@@ -9,7 +9,7 @@
       }
 
       function capitalizeFields (context) {
-        let fa = context.field_answers
+        let fa = context.riskState.field_answers
         const jsonPatch = [
           {op: 'replace', path: '/field_answers/make', value: capitalize(fa.make)},
           {op: 'replace', path: '/field_answers/model', value: capitalize(fa.model)},
@@ -23,8 +23,8 @@
           buttons: [{
             text: 'Capitalize',
             callback: capitalizeFields,
-            visible: true,
-            enabled: true,
+            visible: () => true,
+            enabled: () => true,
           }]
         }
       })
