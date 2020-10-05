@@ -7,31 +7,59 @@
 
       function lookupVIN (context) {
           let fa = context.riskState.field_answers
-          if (fa.vin != ''){
-              var years = ['2021', '2020', '2019', '2018', '2017', '2016', '2015', '2013', '2012', '2011', '2010']
-              var makers = ['Honda', 'Toyota', 'Ford', 'Mazda'];
-              var hondaModels = ['Civic', 'CR-V', 'Accord', 'Odyssey', 'Pilot', 'Passport'];
-              var toyotaModels = ['Corolla', 'Camry', 'Prius', 'Tacoma', 'Sienna'];
-              var fordModels = ['Mustang', 'Fiesta', 'Explorer', 'F-150', 'Fusion', 'Escape', 'Expedition', 'Taurus'];
-              var mazdaModels = ['CX-9', 'Miata', 'Tribute', 'CX-3', 'CX-5'];
-              var year = years[Math.floor(Math.random() * years.length)];
-              var make = makers[Math.floor(Math.random() * makers.length)];
-              if (make == 'Honda') {
-                  model = hondaModels[Math.floor(Math.random() * hondaModels.length)];
-              } else if (make == 'Toyota') {
-                  model = toyotaModels[Math.floor(Math.random() * toyotaModels.length)];
-              } else if (make == 'Ford') {
-                  model = fordModels[Math.floor(Math.random() * fordModels.length)];
-              } else if (make == 'Mazda') {
-                  model = mazdaModels[Math.floor(Math.random() * mazdaModels.length)];
+          if (fa.vin != '') {
+              if (fa.vin.length >= 17) {
+                  var years = ['2021', '2020', '2019', '2018', '2017', '2016', '2015', '2013', '2012', '2011', '2010']
+                  var makers = ['Honda', 'Toyota', 'Ford', 'Mazda'];
+                  var hondaModels = ['Civic', 'CR-V', 'Accord', 'Odyssey', 'Pilot', 'Passport'];
+                  var toyotaModels = ['Corolla', 'Camry', 'Prius', 'Tacoma', 'Sienna'];
+                  var fordModels = ['Mustang', 'Fiesta', 'Explorer', 'F-150', 'Fusion', 'Escape', 'Expedition', 'Taurus'];
+                  var mazdaModels = ['CX-9', 'Miata', 'Tribute', 'CX-3', 'CX-5'];
+                  if (fa.make == '' && fa.model == '') {
+                      var vin = fa.vin.toUpperCase();
+                      var year = years[Math.floor(Math.random() * years.length)];
+                      var make = makers[Math.floor(Math.random() * makers.length)];
+                      var model = '';
+                      if (make == 'Honda') {
+                          model = hondaModels[Math.floor(Math.random() * hondaModels.length)];
+                      } else if (make == 'Toyota') {
+                          model = toyotaModels[Math.floor(Math.random() * toyotaModels.length)];
+                      } else if (make == 'Ford') {
+                          model = fordModels[Math.floor(Math.random() * fordModels.length)];
+                      } else if (make == 'Mazda') {
+                          model = mazdaModels[Math.floor(Math.random() * mazdaModels.length)];
+                      }
+                  } else {
+                      var vin = fa.vin.toUpperCase();
+                      var year = fa.modelYear;
+                      var make = fa.make;
+                      var model = fa.model;
+                  }
+                  const jsonPatch = [
+                      {op: 'replace', path: '/field_answers/vin', value: vin},
+                      {op: 'replace', path: '/field_answers/modelYear', value: year},
+                      {op: 'replace', path: '/field_answers/make', value: make},
+                      {op: 'replace', path: '/field_answers/model', value: model},
+                  ]
+                  // Simulate a normal delay when looking up information
+                  setTimeout(() => { this.emit(PLUGIN_NAME + '-update-risk', jsonPatch); }, 500);
+                  // this namespaces the event and is important
+              } else {
+                  this.emit(PLUGIN_NAME + "-plugin-error", "Please enter a valid 17 character VIN. It is composed of digits and capital letters that act as a unique identifier for the vehicle.");
               }
-              const jsonPatch = [
-                  {op: 'replace', path: '/field_answers/year', value: year},
-                  {op: 'replace', path: '/field_answers/make', value: make},
-                  {op: 'replace', path: '/field_answers/model', value: model},
-              ]
-              this.emit(PLUGIN_NAME + '-update-risk', jsonPatch) // this namespaces the event and is important
+
+          } else {
+              this.emit(PLUGIN_NAME + "-plugin-error", "Please enter a valid 17 character VIN. It is composed of digits and capital letters that act as a unique identifier for the vehicle.");
           }
+      }
+      /**
+      * Enable or disable then plugin button on the ui depending on the active riskType.
+      *
+      * @param context The context object from the ui.
+      * @returns {boolean} False if a button is to be disabled in the ui.
+      */
+      function visible(context) {
+          return context.riskType == "vehicles";
       }
 
       let plugin = new BriteCorePlugin(PLUGIN_NAME)
@@ -40,11 +68,14 @@
               buttons: [{
                 text: 'VIN Lookup',
                 callback: lookupVIN,
-                visible: () => true,
+                visible: visible,
                 enabled: () => true,
               }]
           }
       })
     </script>
   </head>
+  <body>
+    <center>Plugin is only visible on BriteCore</center>
+  </body>
 </html>
