@@ -1347,8 +1347,8 @@ const Coverages = {
                 "territory": session.vehicle_territory,
                 "ratingTier": session.vehicle_rating_tier,
                 "bodilyInjuryLimit": bodilyInjuryLimit,
-                "includeAntiLockBrakes": session.vehicle_brakes,
-                "chosenDriver": session.driver_name_id,
+                "includeAntiLockBrakes": Boolean(session.vehicle_brakes),
+                "chosenDriver": '', //session.driver_name_id
                 "propertyDamageLimit": propertyDamageLimit,
                 "medicalExpenseLimit": medicalExpenseLimit,
                 "passiveRestraintSystem": passiveRestraintLimit,
@@ -1359,9 +1359,10 @@ const Coverages = {
                 "make": session.vehicle_make,
                 "model": session.vehicle_model,
                 "modelYear": session.vehicle_model_year,
-                "mileage": session.vehicle_mileage,
+                "mileage": parseInt(session.vehicle_mileage),
                 "use": session.vehicle_use,
-                "performance": session.vehicle_performance
+                "performance": session.vehicle_performance,
+                "hadAnyAccidentsInTheLast24Hours": null
             }
             // Update vehicle risk type for the quote
             if (existing_payload != null) {
@@ -1369,11 +1370,15 @@ const Coverages = {
                 existing_payload_copy = existing_payload;
                 existing_payload_copy.risk_state['field_answers'] = field_answers;
                 // Remove unecessary keys and values
+                delete existing_payload_copy.id;
+                delete existing_payload_copy.number;
+                delete existing_payload_copy.risk_state['items'];
                 delete existing_payload_copy.final_rate;
                 delete existing_payload_copy.risk_quotes;
                 delete existing_payload_copy.generated_by;
                 delete existing_payload_copy.date_added;
                 delete existing_payload_copy.date_modified;
+                delete existing_payload_copy.final_prorated_rate;
                 delete existing_payload_copy.meta;
                 payload = JSON.stringify(existing_payload_copy);
             } else {
@@ -1381,11 +1386,15 @@ const Coverages = {
                 risk_type_response_copy = session.add_vehicle_risk_response;
                 risk_type_response_copy.risk_state['field_answers'] = field_answers;
                 // Remove unecessary keys and values
+                delete risk_type_response_copy.id;
+                delete risk_type_response_copy.number;
+                delete risk_type_response_copy.risk_state['items'];
                 delete risk_type_response_copy.final_rate;
                 delete risk_type_response_copy.risk_quotes;
                 delete risk_type_response_copy.generated_by;
                 delete risk_type_response_copy.date_added;
                 delete risk_type_response_copy.date_modified;
+                delete risk_type_response_copy.final_prorated_rate;
                 delete risk_type_response_copy.meta;
                 payload = JSON.stringify(risk_type_response_copy);
             }

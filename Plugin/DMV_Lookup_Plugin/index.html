@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <script src='https://d1zol2vqugn1g2.cloudfront.net/britecore-ui-plugins.js'></script>
+
+    <script>
+      const PLUGIN_NAME = 'DMV_Lookup'
+      /**
+      * Enable or disable then plugin button on the ui depending on the active riskType.
+      *
+      * @param context The context object from the ui.
+      * @returns {boolean} False if a button is to be disabled in the ui.
+      */
+      function visible(context) {
+          console.log(context);
+          return context.riskType == "drivers";
+      }
+
+      let plugin = new BriteCorePlugin(PLUGIN_NAME)
+      plugin.initialize({
+          'button-row': {
+              buttons: [{
+                text: 'DMV Lookup',
+                callback: lookupVIN,
+                visible: visible,
+                enabled: () => true,
+              }]
+          }
+      })
+    </script>
+  </head>
+  <body>
+    <center>Plugin is only visible on BriteCore</center>
+  </body>
+</html>
