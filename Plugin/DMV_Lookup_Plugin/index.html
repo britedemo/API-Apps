@@ -1,31 +1,202 @@
 <html>
   <head>
-    <script src='https://d1zol2vqugn1g2.cloudfront.net/britecore-ui-plugins.js'></script>
+    <script src="https://d1zol2vqugn1g2.cloudfront.net/britecore-ui-plugins.js"></script>
 
     <script>
-      const PLUGIN_NAME = 'DMV_Lookup'
-      /**
-      * Enable or disable then plugin button on the ui depending on the active riskType.
-      *
-      * @param context The context object from the ui.
-      * @returns {boolean} False if a button is to be disabled in the ui.
-      */
-      function visible(context) {
-          console.log(context);
-          return context.riskType == "drivers";
+      const PLUGIN_NAME = "DMV_Lookup";
+
+      function lookupDriver (first_name, last_name) {
+          if (first_name == '') {
+              var first_names = ['Jenny', 'Jack', 'Susan', 'Jamie', 'Sara', 'Mark', 'Bill', 'William', 'Fred', 'Pam', 'Sarah', 'Anne', 'Billy', 'Molly', 'Wayne', 'Tom'];
+              var dobs = ['1982-10-02', '1965-04-12', '1948-07-03', '1985-11-09', '1990-12-22', '1974-01-05', '1994-08-06', '1950-04-14']
+              var genders = ['gender_male', 'gender_female'];
+              var mstatuses = ['maritalStatus_single', 'maritalStatus_married']
+              first_name = first_names[Math.floor(Math.random() * first_names.length)];
+              var dob = dobs[Math.floor(Math.random() * dobs.length)];
+              var gender = genders[Math.floor(Math.random() * genders.length)];
+              var mstatus = mstatuses[Math.floor(Math.random() * mstatuses.length)];
+          } else {
+              var dob = '1980-10-06';
+              var gender = 'gender_male';
+              var mstatus = 'maritalStatus_single';
+          }
+          var driver = {
+              "driverName": first_name + ' ' + last_name,
+              "dob": dob,
+              "gender": gender,
+              "maritalStatus": mstatus,
+              "driverLicenseNumber": 'DL8753957503718',
+              "goodStudent": false,
+              "driverTraining": false,
+              "includeSeniorDiscount": false
+          };
+          return driver;
       }
 
-      let plugin = new BriteCorePlugin(PLUGIN_NAME)
-      plugin.initialize({
-          'button-row': {
-              buttons: [{
-                text: 'DMV Lookup',
-                callback: lookupVIN,
-                visible: visible,
-                enabled: () => true,
-              }]
+      function lookupVehicle () {
+          var vins = ['1M98HFKL4670AVC8Z', '1ALD9238LJMDF85LV', '1PLM998ASFLW4210X', '1ZPLS89002MNDJLBB'];
+          var years = ['2021', '2020', '2019', '2018', '2017', '2016', '2015', '2013', '2012', '2011', '2010']
+          var makers = ['Honda', 'Toyota', 'Ford', 'Mazda'];
+          var hondaModels = ['Civic', 'CR-V', 'Accord', 'Odyssey', 'Pilot', 'Passport'];
+          var toyotaModels = ['Corolla', 'Camry', 'Prius', 'Tacoma', 'Sienna'];
+          var fordModels = ['Mustang', 'Fiesta', 'Explorer', 'F-150', 'Fusion', 'Escape', 'Expedition', 'Taurus'];
+          var mazdaModels = ['CX-9', 'Miata', 'Tribute', 'CX-3', 'CX-5'];
+
+          var vin = vins[Math.floor(Math.random() * vins.length)];
+          var year = years[Math.floor(Math.random() * years.length)];
+          var make = makers[Math.floor(Math.random() * makers.length)];
+          var model = '';
+          if (make == 'Honda') {
+              model = hondaModels[Math.floor(Math.random() * hondaModels.length)];
+          } else if (make == 'Toyota') {
+              model = toyotaModels[Math.floor(Math.random() * toyotaModels.length)];
+          } else if (make == 'Ford') {
+              model = fordModels[Math.floor(Math.random() * fordModels.length)];
+          } else if (make == 'Mazda') {
+              model = mazdaModels[Math.floor(Math.random() * mazdaModels.length)];
           }
-      })
+          var vehicle = {
+              "vin": vin,
+              "model_year": year,
+              "make": make,
+              "model": model,
+              "mileage": Math.floor(Math.random() * 10000 + 2000),
+              "rating_tier": 'ratingTier_standard',
+              "territory": 'territory_2',
+              "performance": 'performance_standard',
+              "use": 'use_15MilestoWork',
+              "passiveRestraintSystem": 'passiveRestraintSystem_fullyEquipped'
+          };
+          return vehicle;
+      }
+
+      function lookupDMV(context) {
+        let fa = context.rootRiskQuote.risk_state.field_answers;
+        if (fa.firstNameNI != '' && fa.lastNameNI != '' && fa.streetAddressNI != '' && fa.cityNI != '' && fa.stateOfNI != '' && fa.zipCodeNI != '') {
+            // Get Named Insured Info
+            var first_name = fa.firstNameNI;
+            var last_name = fa.lastNameNI;
+            var drivers = [];
+            var vehicles = [];
+
+            // Create 3 drivers
+            drivers.push(lookupDriver(first_name, last_name)); // Named Insured
+            drivers.push(lookupDriver('', last_name)); // New Driver
+            drivers.push(lookupDriver('', last_name)); // New Driver
+
+            // Create 2 vehicles
+            vehicles.push(lookupVehicle());
+            vehicles.push(lookupVehicle());
+
+            function addDriverRisks (context) {
+                try {
+                    // Define RiskTypes for drivers and vehicles. These are used when creating new Quotes
+                    let driverRiskType = context.riskTypes.find(riskType => riskType.name === 'drivers');
+                    let parentRiskQuote = context.rootRiskQuote;
+                    let parsedData = {
+                        riskQuotesData: []
+                    };
+                    // Add Drivers
+                    for (i = 0; i < drivers.length; i++) {
+                        let jsonPatch = [
+                          {op: 'replace', path: '/field_answers/driverName', value: drivers[i].driverName},
+                          {op: 'replace', path: '/field_answers/dob', value: drivers[i].dob},
+                          {op: 'replace', path: '/field_answers/gender', value: drivers[i].gender},
+                          {op: 'replace', path: '/field_answers/maritalStatus', value: drivers[i].maritalStatus},
+                          {op: 'replace', path: '/field_answers/driverLicenseNumber', value: drivers[i].driverLicenseNumber},
+                          {op: 'replace', path: '/field_answers/goodStudent', value: drivers[i].goodStudent},
+                          {op: 'replace', path: '/field_answers/driverTraining', value: drivers[i].driverTraining},
+                          {op: 'replace', path: '/field_answers/includeSeniorDiscount', value: drivers[i].includeSeniorDiscount}
+                        ]
+                        parsedData.riskQuotesData.push({
+                          parentRiskQuote: parentRiskQuote,
+                          riskType: driverRiskType,
+                          jsonPatch: jsonPatch
+                        })
+                    }
+                    return parsedData;
+
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+
+            function addVehicleRisks (context) {
+                try {
+                    // Define RiskTypes for drivers and vehicles. These are used when creating new Quotes
+                    let vehicleRiskType = context.riskTypes.find(riskType => riskType.name === 'vehicles');
+                    let parentRiskQuote = context.rootRiskQuote;
+                    let parsedData = {
+                        riskQuotesData: []
+                    };
+                    // Add Vehicles
+                    for (j = 0; j < vehicles.length; j++) {
+                        let jsonPatch = [
+                            {op: 'replace', path: '/field_answers/vin', value: vehicles[j].vin},
+                            {op: 'replace', path: '/field_answers/make', value: vehicles[j].make},
+                            {op: 'replace', path: '/field_answers/model', value: vehicles[j].model},
+                            {op: 'replace', path: '/field_answers/modelYear', value: vehicles[j].model_year},
+                            {op: 'replace', path: '/field_answers/mileage', value: vehicles[j].mileage},
+                            {op: 'replace', path: '/field_answers/ratingTier', value: vehicles[j].rating_tier},
+                            {op: 'replace', path: '/field_answers/territory', value: vehicles[j].territory},
+                            {op: 'replace', path: '/field_answers/performance', value: vehicles[j].performance},
+                            {op: 'replace', path: '/field_answers/use', value: vehicles[j].use},
+                            {op: 'replace', path: '/field_answers/passiveRestraintSystem', value: vehicles[j].passiveRestraintSystem}
+                        ]
+                        parsedData.riskQuotesData.push({
+                          parentRiskQuote: parentRiskQuote,
+                          riskType: vehicleRiskType,
+                          jsonPatch: jsonPatch
+                        })
+                    }
+                    return parsedData;
+
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+
+            const driverRisks = addDriverRisks(context);
+            const vehicleRisks = addVehicleRisks(context);
+            try {
+                // Add Drivers and Vehicles
+                this.emit(PLUGIN_NAME + "-create-and-update-risk", driverRisks.riskQuotesData);
+                this.emit(PLUGIN_NAME + "-create-and-update-risk", vehicleRisks.riskQuotesData);
+                // Simulate a 10 second delay in getting data from third party vendor
+                setTimeout(() => {
+                    this.emit(PLUGIN_NAME + "-plugin-message", "DMV Lookup found " + drivers.length + " Drivers and " + vehicles.length + " Vehicles! These have been automatically added to this quote.");
+                }, 10000);
+            } catch (e) {
+                console.log(e);
+                this.emit(PLUGIN_NAME + "-plugin-error", "DMV Lookup encountered a problem.");
+            }
+        } else {
+            this.emit(PLUGIN_NAME + "-plugin-error", "Please enter a first and last name and street address to lookup DMV information.");
+        }
+      }
+      /**
+       * Enable or disable then plugin button on the ui depending on the active riskType.
+       *
+       * @param context The context object from the ui.
+       * @returns {boolean} False if a button is to be disabled in the ui.
+       */
+      function visible(context) {
+        return context.riskTypeState.name == "policy";
+      }
+
+      let plugin = new BriteCorePlugin(PLUGIN_NAME);
+      plugin.initialize({
+        "button-row": {
+          buttons: [
+            {
+              text: "DMV Lookup",
+              callback: lookupDMV,
+              visible: visible,
+              enabled: () => true
+            }
+          ]
+        }
+      });
     </script>
   </head>
   <body>

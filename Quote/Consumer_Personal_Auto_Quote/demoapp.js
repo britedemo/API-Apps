@@ -424,20 +424,20 @@ const Drivers = {
                 <span><b>Gender</b></span><br>
                 <div class="btn-group btn-group-toggle mt-2" data-toggle="buttons">
                     <label class="btn btn-normal btn-outline-info" id="genderMale">
-                        <input type="radio" autocomplete="off" id="genderMaleCheck" @click="driverQuestion('gender','Male')">Male
+                        <input type="radio" autocomplete="off" id="genderMaleCheck" @click="driverQuestion('gender','gender_male')">Male
                     </label>
                     <label class="btn btn-normal btn-outline-info" id="genderFemale">
-                        <input type="radio" autocomplete="off" id="genderFemaleCheck" @click="driverQuestion('gender','Female')">Female
+                        <input type="radio" autocomplete="off" id="genderFemaleCheck" @click="driverQuestion('gender','gender_female')">Female
                     </label>
                 </div>
                 <br><br>
                 <span><b>Marital Status</b></span><br>
                 <div class="btn-group btn-group-toggle mt-2" data-toggle="buttons">
                     <label class="btn btn-normal btn-outline-info" id="singleStatus">
-                        <input type="radio" value="true" autocomplete="off" id="singleStatusCheck" @click="driverQuestion('maritalStatus','Single')">Single
+                        <input type="radio" value="true" autocomplete="off" id="singleStatusCheck" @click="driverQuestion('maritalStatus','maritalStatus_single')">Single
                     </label>
                     <label class="btn btn-normal btn-outline-info" id="marriedStatus">
-                        <input type="radio" value ="false" autocomplete="off" id="marriedStatusCheck" @click="driverQuestion('maritalStatus','Married')">Married
+                        <input type="radio" value ="false" autocomplete="off" id="marriedStatusCheck" @click="driverQuestion('maritalStatus','maritalStatus_married')">Married
                     </label>
                 </div>
                 <br><br>
@@ -505,14 +505,14 @@ const Drivers = {
         }
 
         // Add load stored values for driver
-        if (session.driver_gender == 'Male') {
+        if (session.driver_gender == 'gender_male') {
             document.getElementById("genderMaleCheck").checked = true;
             document.getElementById("genderFemaleCheck").checked = false;
         } else {
             document.getElementById("genderMaleCheck").checked = false;
             document.getElementById("genderFemaleCheck").checked = true;
         }
-        if (session.driver_marital_status == 'Single') {
+        if (session.driver_marital_status == 'maritalStatus_single') {
             document.getElementById("singleStatusCheck").checked = true;
             document.getElementById("marriedStatusCheck").checked = false;
         } else {
@@ -1243,8 +1243,7 @@ const Coverages = {
                 'driverLicenseNumber': "",
                 'goodStudent': session.driver_good_student,
                 'driverTraining': session.driver_training,
-                'includeSeniorDiscount': session.driver_senior,
-                'numberOfYearsLicensed': null
+                'includeSeniorDiscount': session.driver_senior
             }
             // Update driver risk type for the quote
             risk_id = session.add_driver_risk_response.risk_state['id'];
