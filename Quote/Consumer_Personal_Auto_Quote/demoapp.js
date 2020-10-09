@@ -77,7 +77,10 @@ var formatter = new Intl.NumberFormat('en-US', {
 
 var numberFormat = new Intl.NumberFormat();
 
-const apiClient = createAPIClient();
+var values = createAPIClient();
+const apiClient = values.apiClient;
+const auth_type = values.auth_type;
+const apiKey = values.apiKey;
 
 const Start = {
     template: `
@@ -1371,7 +1374,6 @@ const Coverages = {
                 // Remove unecessary keys and values
                 delete existing_payload_copy.id;
                 delete existing_payload_copy.number;
-                delete existing_payload_copy.risk_state['items'];
                 delete existing_payload_copy.final_rate;
                 delete existing_payload_copy.risk_quotes;
                 delete existing_payload_copy.generated_by;
@@ -1387,7 +1389,6 @@ const Coverages = {
                 // Remove unecessary keys and values
                 delete risk_type_response_copy.id;
                 delete risk_type_response_copy.number;
-                delete risk_type_response_copy.risk_state['items'];
                 delete risk_type_response_copy.final_rate;
                 delete risk_type_response_copy.risk_quotes;
                 delete risk_type_response_copy.generated_by;
@@ -1508,7 +1509,7 @@ const Coverages = {
                     }
                     let config = {
                         headers: {
-                            'Authorization': site_token_type + ' ' + site_token,
+                            'Authorization': auth_type + ' ' + apiKey,
                             'Data': JSON.stringify(data)
                         }
                     }
@@ -1560,7 +1561,7 @@ const Coverages = {
                     }
                     let config = {
                         headers: {
-                            'Authorization': site_token_type + ' ' + site_token,
+                            'Authorization': auth_type + ' ' + apiKey,
                             'Data': JSON.stringify(data)
                         }
                     }
@@ -1613,7 +1614,7 @@ const Coverages = {
                     }
                     let config = {
                         headers: {
-                            'Authorization': site_token_type + ' ' + site_token,
+                            'Authorization': auth_type + ' ' + apiKey,
                             'Data': JSON.stringify(data)
                         }
                     }
@@ -1666,7 +1667,7 @@ const Coverages = {
                     }
                     let config = {
                         headers: {
-                            'Authorization': site_token_type + ' ' + site_token,
+                            'Authorization': auth_type + ' ' + apiKey,
                             'Data': JSON.stringify(data)
                         }
                     }
@@ -1719,7 +1720,7 @@ const Coverages = {
                     }
                     let config = {
                         headers: {
-                            'Authorization': site_token_type + ' ' + site_token,
+                            'Authorization': auth_type + ' ' + apiKey,
                             'Data': JSON.stringify(data)
                         }
                     }

@@ -19,20 +19,13 @@ new Vue({
         methods: {
             findAgencies: function() {
                 // Call the API using Axios
-                var api = '/api/v2/contacts/retrieve_agencies_near_zip';
-                // Payload
                 var payload = JSON.stringify({
                     "max_distance": parseInt($("#maxDistance").val()),
                     "zipcode": $("#zipCode").val(),
                     "results": parseInt($("#maxResults").val())
                 });
-                var headers = {
-                    'Content-Type': 'application/json',
-                    'Authorization': auth_type + ' ' + apiKey
-                };
                 this.loading = true;
-                apiClient
-                    .post(site_url + api, payload, {"headers" : headers})
+                apiClient.post('/api/v2/contacts/retrieve_agencies_near_zip', payload)
                     .then(response => {
                     this.message = response.data['messages'][0];
                     this.agencies = response.data['data'];

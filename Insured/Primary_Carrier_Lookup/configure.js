@@ -4,11 +4,11 @@
 // use the demo application in your own code, or outside of BriteDemo, simply enter
 // your BriteDemo API key with an auth type of 'Token' and the site URL below.
 
-const site_url = ""; // Set the site url here. Leave empty by default.
+var site_url = ""; // Set the site url here. Leave empty by default.
 
-const apiKey = ""; // Set your BriteDemo API key here. Leave empty by default.
+var apiKey = ""; // Set your BriteDemo API key here. Leave empty by default.
 
-const auth_type = "Token";
+var auth_type = "Token";
 
 function createAPIClient() {
   // Get user session info - DO NOT MODIFY CODE BELOW THIS LINE

@@ -23,19 +23,13 @@ new Vue({
         methods: {
             lookupAddress: function() {
                 // Call the API using Axios
-                var api = '/api/v2/contacts/retrieveAddressInfo';
                 var payload = JSON.stringify({
                     "stateAbbr": $("#stateSelect").val(),
                     "zip": $("#zipCode").val(),
                     "addressLine1": $("#streetAddress").val()
                 });
-                var headers = {
-                    'Content-Type': 'application/json',
-                    'Authorization': auth_type + ' ' + apiKey
-                };
                 this.loading = true;
-                apiClient
-                    .post(site_url + api, payload, {"headers" : headers})
+                apiClient.post('/api/v2/contacts/retrieveAddressInfo', payload)
                     .then(response => {
                     // Handle response
                     this.cities = response.data['cities'];

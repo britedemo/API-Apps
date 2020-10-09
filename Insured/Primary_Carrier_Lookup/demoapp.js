@@ -21,15 +21,8 @@ new Vue({
         methods: {
             lookupCarrier: function() {
                 // Call the API using Axios
-                var api = '/api/v2/insured/get_primary_carrier';
-                var payload = JSON.stringify({}); // Payload
-                var headers = {
-                    'Content-Type': 'application/json',
-                    'Authorization': auth_type + ' ' + apiKey
-                };
                 this.loading = true;
-                apiClient
-                    .post(site_url + api, payload, {"headers" : headers})
+                apiClient.post('/api/v2/insured/get_primary_carrier', {})
                     .then(response => {
                     this.carrierName = response.data.data.name;
                     this.carrierAddress = response.data.data.addresses[0].address_line1;
