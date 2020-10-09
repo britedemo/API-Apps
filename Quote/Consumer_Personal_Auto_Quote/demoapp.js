@@ -77,7 +77,7 @@ var formatter = new Intl.NumberFormat('en-US', {
 
 var numberFormat = new Intl.NumberFormat();
 
-apiClient = createAPIClient();
+const apiClient = createAPIClient();
 
 const Start = {
     template: `

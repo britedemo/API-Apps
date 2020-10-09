@@ -3,6 +3,8 @@ if (window.self !== window.top) {
     document.getElementById("copyright").innerHTML = "";
 }
 
+const apiClient = createAPIClient();
+
 new Vue({
         delimiters: ['[[', ']]'],
         el: '#demoapp',
@@ -29,7 +31,7 @@ new Vue({
                     'Authorization': auth_type + ' ' + apiKey
                 };
                 this.loading = true;
-                axios
+                apiClient
                     .post(site_url + api, payload, {"headers" : headers})
                     .then(response => {
                     this.message = response.data['messages'][0];

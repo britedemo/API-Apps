@@ -1,42 +1,41 @@
-// This is a configuration file to override the default API authentication behavior.
+// The configuration variables below override the default API authentication behavior.
 // If the values are left empty, then automatic authentication will occur using the
-// currently logged in user on BriteDemo. If you wish to manually override this to
-// use the demo application in your own code, simply enter your BriteDemo API key
-// with an auth type of 'Token' and the site URL below.
+// currently authorized user on BriteDemo. If you wish to manually override this to
+// use the demo application in your own code, or outside of BriteDemo, simply enter
+// your BriteDemo API key with an auth type of 'Token' and the site URL below.
+
+const site_url = ""; // Set the site url here. Leave empty by default.
+
+const apiKey = ""; // Set your BriteDemo API key here. Leave empty by default.
+
+const auth_type = "Token";
 
 function createAPIClient() {
-  var site_url = "https://demo.britecore.com";
-
-  var apiKey = ""; // Set your BriteDemo API key here
-
-  var auth_type = "Token";
-
-
   // Get user session info - DO NOT MODIFY CODE BELOW THIS LINE
   var urlParams = new URLSearchParams(window.location.search);
   var sessionKey = urlParams.get('session');
+  var siteURL = urlParams.get('site');
   if (apiKey == "" && sessionKey != null) {
       apiKey = sessionKey;
+      if (site_url == "" && siteURL != null) {
+          site_url = siteURL;
+      }
       window.history.replaceState(null, null, window.location.pathname);
   } else {
       // Get user session from referring url instead
       var urlParams2 = new URLSearchParams(window.frames['document'].referrer);
       sessionKey = urlParams2.get('session');
+      siteURL = urlParams2.get('site');
       if (apiKey == "" && sessionKey != null) {
           apiKey = sessionKey;
+          if (site_url == "" && siteURL != null) {
+              site_url = siteURL;
+          }
       } else {
-          console.log("Missing authentication token!")
+          console.log("Missing authentication information!")
       }
   }
-
-  if (site_url == "") {
-    // Use default
-    site_url = "https://demo.britecore.com";
-  }
-  if (auth_type == "") {
-    // Use default
-    auth_type = "Token";
-  }
+  // Create the API client
   if (site_url != "" && auth_type != "" && apiKey != "") {
     const apiClient = axios.create({
       baseURL: site_url,
