@@ -77,10 +77,9 @@ var formatter = new Intl.NumberFormat('en-US', {
 
 var numberFormat = new Intl.NumberFormat();
 
-var values = createAPIClient();
-const apiClient = values.apiClient;
-const auth_type = values.auth_type;
-const apiKey = values.apiKey;
+const apiClient = createAPIClient();
+const axios_auth_type = auth_type;
+const axios_api_key = apiKey;
 
 const Start = {
     template: `
@@ -1509,7 +1508,7 @@ const Coverages = {
                     }
                     let config = {
                         headers: {
-                            'Authorization': auth_type + ' ' + apiKey,
+                            'Authorization': axios_auth_type + ' ' + axios_api_key,
                             'Data': JSON.stringify(data)
                         }
                     }
@@ -1561,7 +1560,7 @@ const Coverages = {
                     }
                     let config = {
                         headers: {
-                            'Authorization': auth_type + ' ' + apiKey,
+                            'Authorization': axios_auth_type + ' ' + axios_api_key,
                             'Data': JSON.stringify(data)
                         }
                     }
@@ -1614,7 +1613,7 @@ const Coverages = {
                     }
                     let config = {
                         headers: {
-                            'Authorization': auth_type + ' ' + apiKey,
+                            'Authorization': axios_auth_type + ' ' + axios_api_key,
                             'Data': JSON.stringify(data)
                         }
                     }
@@ -1667,7 +1666,7 @@ const Coverages = {
                     }
                     let config = {
                         headers: {
-                            'Authorization': auth_type + ' ' + apiKey,
+                            'Authorization': axios_auth_type + ' ' + axios_api_key,
                             'Data': JSON.stringify(data)
                         }
                     }
@@ -1720,7 +1719,7 @@ const Coverages = {
                     }
                     let config = {
                         headers: {
-                            'Authorization': auth_type + ' ' + apiKey,
+                            'Authorization': axios_auth_type + ' ' + axios_api_key,
                             'Data': JSON.stringify(data)
                         }
                     }

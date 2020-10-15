@@ -47,6 +47,7 @@ function createAPIClient() {
     });
     return apiClient;
   } else {
-    console.log("Missing information needed to authenticate!");
+      $('#authModal').modal();
+      console.log("Missing information needed to authenticate!");
   }
 }

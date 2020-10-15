@@ -45,12 +45,9 @@ function createAPIClient() {
         Authorization: auth_type + " " + apiKey
       }
     });
-    return {
-        apiClient: apiClient,
-        auth_type: auth_type,
-        apiKey: apiKey
-    };
+    return apiClient;
   } else {
-    console.log("Missing information needed to authenticate!");
+      $('#authModal').modal();
+      console.log("Missing information needed to authenticate!");
   }
 }
