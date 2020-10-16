@@ -1131,11 +1131,8 @@ const Coverages = {
                 document.getElementById('bodilyInjuryTotal').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
                 document.getElementById('propertyDamageTotal').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
                 document.getElementById('totalPremium').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
-                if (session.add_driver_risk_response == null) {
-                    this.addDriverRisk(true);
-                } else {
-                    this.updateDriverRisk(true);
-                }
+                // Update Policy Risk with Answers
+                this.updatePolicyRisk(session.quote_risks, true);
             })
             .catch(error => {
                 console.log('There was an error:', error.response);
@@ -1148,6 +1145,55 @@ const Coverages = {
             });
     },
     methods: {
+        updatePolicyRisk: function(existing_payload, vehicle) {
+            field_answers = {
+                "uninsuredMotoristBodilyInjury": "uninsuredMotoristBodilyInjury_50000100000",
+                "uninsuredMotoristPropertyDamage": "uninsuredMotoristPropertyDamage_25000",
+                "firstNameNI": session.contact_first_name,
+                "middleInitialNI": session.contact_middle_name,
+                "lastNameNI": session.contact_last_name,
+                "suffixNI": "",
+                "socialSecurityNumberNI": "123-45-6789",
+                "dateOfBirthNI": session.driver_dob,
+                "licenseNumberNI": "",
+                "licenseStateNI": session.state,
+                "cityNI": session.city,
+                "streetAddressNI": session.street_address,
+                "stateOfNI": session.state,
+                "zipCodeNI": session.zip_code,
+                "emailNI": session.contact_email,
+                "uber": session.q1,
+                "rentedToOthers": session.q2,
+                "coverageDeclinedInThree": session.q3,
+                "deliveryUse": session.q4,
+                "hasAnyDriversLicenseBeenSuspendedOrRevoked": session.q5,
+                "financialFilings": session.q6
+            }
+            // Update policy risk type for the quote
+            risk_id = existing_payload.risk_state['id'];
+            quote_risks_copy = existing_payload;
+            quote_risks_copy.risk_state['field_answers'] = field_answers;
+            // Remove unecessary keys and values
+            delete quote_risks_copy.final_rate;
+            delete quote_risks_copy.risk_quotes;
+            delete quote_risks_copy.generated_by;
+            delete quote_risks_copy.date_added;
+            delete quote_risks_copy.date_modified;
+            delete quote_risks_copy.meta;
+
+            payload = JSON.stringify(quote_risks_copy);
+            console.log('PUT: ' + '/api/quote/risks/' + risk_id + '/');
+            console.log('PAYLOAD: ' + payload);
+            apiClient.put('/api/quote/risks/' + risk_id + '/', payload)
+                .then(response => {
+                    console.log(response.data);
+                    session.quote_risks = response.data;
+                    this.addDriverRisk(vehicle);
+                })
+                .catch(error => {
+                    console.log('There was an error:', error.response);
+                });
+        },
         updateQuoteRisks: function(vehicle, existing_payload){
             uninsuredBodilyInjury = document.getElementById("uninsuredBodilyInjuryLimit");
             uninsuredBodilyInjuryLimit = uninsuredBodilyInjury.options[uninsuredBodilyInjury.selectedIndex].value;
@@ -1163,7 +1209,7 @@ const Coverages = {
                 "socialSecurityNumberNI": "123-45-6789",
                 "dateOfBirthNI": session.driver_dob,
                 "licenseNumberNI": "",
-                "licenseStateNI": "",
+                "licenseStateNI": session.state,
                 "cityNI": session.city,
                 "streetAddressNI": session.street_address,
                 "stateOfNI": session.state,
@@ -1201,7 +1247,6 @@ const Coverages = {
                         } else {
                             this.updateVehicleRisk()
                         }
-
                     }
                 })
                 .catch(error => {
@@ -1349,7 +1394,7 @@ const Coverages = {
                 "ratingTier": session.vehicle_rating_tier,
                 "bodilyInjuryLimit": bodilyInjuryLimit,
                 "includeAntiLockBrakes": Boolean(session.vehicle_brakes),
-                "chosenDriver": '', //session.driver_name_id
+                "chosenDriver": session.driver_name_id,
                 "propertyDamageLimit": propertyDamageLimit,
                 "medicalExpenseLimit": medicalExpenseLimit,
                 "passiveRestraintSystem": passiveRestraintLimit,
@@ -1481,7 +1526,7 @@ const Coverages = {
                     document.getElementById('totalPremium').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
                     // Add Comprehensive Coverage Item
                     payload = JSON.stringify({
-                        "risk_quote": session.add_vehicle_risk_response.id,
+                        "risk_quote": session.add_vehicle_risk_response.risk_state['id'],
                         "risk_item_name": "comprehensive"
                     });
                     console.log('POST: ' + '/api/quote/items/');
@@ -1504,7 +1549,7 @@ const Coverages = {
                     document.getElementById('totalPremium').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
                     // Remove Comprehensive Coverage Item
                     let data = {
-                        'risk_quote': session.add_vehicle_risk_response.id
+                        'risk_quote': session.add_vehicle_risk_response.risk_state['id']
                     }
                     let config = {
                         headers: {
@@ -1533,7 +1578,7 @@ const Coverages = {
                     document.getElementById('totalPremium').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
                     // Add Collision Coverage Item
                     payload = JSON.stringify({
-                        "risk_quote": session.add_vehicle_risk_response.id,
+                        "risk_quote": session.add_vehicle_risk_response.risk_state['id'],
                         "risk_item_name": "collision"
                     });
                     console.log('POST: ' + '/api/quote/items/');
@@ -1556,7 +1601,7 @@ const Coverages = {
                     document.getElementById('totalPremium').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
                     // Remove Collision Coverage Item
                     let data = {
-                        'risk_quote': session.add_vehicle_risk_response.id
+                        'risk_quote': session.add_vehicle_risk_response.risk_state['id']
                     }
                     let config = {
                         headers: {
@@ -1586,7 +1631,7 @@ const Coverages = {
                     document.getElementById('totalPremium').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
                     // Add Additional Equipment Coverage Item
                     payload = JSON.stringify({
-                        "risk_quote": session.add_vehicle_risk_response.id,
+                        "risk_quote": session.add_vehicle_risk_response.risk_state['id'],
                         "risk_item_name": "additionalEquipment"
                     });
                     console.log('POST: ' + '/api/quote/items/');
@@ -1609,7 +1654,7 @@ const Coverages = {
                     document.getElementById('totalPremium').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
                     // Remove Additional Equipment Coverage Item
                     let data = {
-                        'risk_quote': session.add_vehicle_risk_response.id
+                        'risk_quote': session.add_vehicle_risk_response.risk_state['id']
                     }
                     let config = {
                         headers: {
@@ -1639,7 +1684,7 @@ const Coverages = {
                     document.getElementById('totalPremium').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
                     // Add Transportation Expenses Coverage Item
                     payload = JSON.stringify({
-                        "risk_quote": session.add_vehicle_risk_response.id,
+                        "risk_quote": session.add_vehicle_risk_response.risk_state['id'],
                         "risk_item_name": "transportationExpenses"
                     });
                     console.log('POST: ' + '/api/quote/items/');
@@ -1662,7 +1707,7 @@ const Coverages = {
                     document.getElementById('totalPremium').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
                     // Remove Transportation Expenses Coverage Item
                     let data = {
-                        'risk_quote': session.add_vehicle_risk_response.id
+                        'risk_quote': session.add_vehicle_risk_response.risk_state['id']
                     }
                     let config = {
                         headers: {
@@ -1692,7 +1737,7 @@ const Coverages = {
                     document.getElementById('totalPremium').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
                     // Add Towing Coverage Item
                     payload = JSON.stringify({
-                        "risk_quote": session.add_vehicle_risk_response.id,
+                        "risk_quote": session.add_vehicle_risk_response.risk_state['id'],
                         "risk_item_name": "towing"
                     });
                     console.log('POST: ' + '/api/quote/items/');
@@ -1715,7 +1760,7 @@ const Coverages = {
                     document.getElementById('totalPremium').innerHTML = "<i class=\"fa fa-spinner fa-pulse fa-1x fa-fw\"></i>";
                     // Remove Towing Coverage Item
                     let data = {
-                        'risk_quote': session.add_vehicle_risk_response.id
+                        'risk_quote': session.add_vehicle_risk_response.risk_state['id']
                     }
                     let config = {
                         headers: {
