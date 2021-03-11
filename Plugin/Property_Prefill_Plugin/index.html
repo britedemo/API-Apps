@@ -6,9 +6,10 @@
       const PLUGIN_NAME = "Property_Prefill";
 
       function lookupProperty(context) {
-        let fa = context.rootRiskQuote.risk_state.field_answers;
+        let fa = context.riskState.field_answers;
         if (fa.riskAddress != '' && fa.city != '' && fa.state != '' && fa.county != '') {
             const jsonPatch = [
+                {op: 'replace', path: '/field_answers/replacementCost', value: 230000},
                 {op: 'replace', path: '/field_answers/protectionClass', value: 'Protected'},
                 {op: 'replace', path: '/field_answers/protectiveDevices', value: true},
                 {op: 'replace', path: '/field_answers/firewiseCommunity', value: false},
@@ -18,9 +19,11 @@
                 {op: 'replace', path: '/field_answers/form', value: 'Form 1'},
             ]
             // Simulate a normal delay when looking up information
-            setTimeout(() => { this.emit(PLUGIN_NAME + '-update-risk', jsonPatch); }, 500);
+            setTimeout(() => { this.parent.updateRisk(jsonPatch); }, 500);
         } else {
-            this.emit(PLUGIN_NAME + "-plugin-error", "Please enter the complete property address to lookup information.");
+            this.parent.displayErrors(
+              "Please enter the complete property address to lookup information."
+            );
         }
       }
       /**

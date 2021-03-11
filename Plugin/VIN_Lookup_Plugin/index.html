@@ -9,6 +9,7 @@
           let fa = context.riskState.field_answers
           if (fa.vin != '') {
               if (fa.vin.length >= 17) {
+                  this.parent.showLoadingIndicator('component', true)
                   var years = ['2021', '2020', '2019', '2018', '2017', '2016', '2015', '2013', '2012', '2011', '2010']
                   var makers = ['Honda', 'Toyota', 'Ford', 'Mazda'];
                   var hondaModels = ['Civic', 'CR-V', 'Accord', 'Odyssey', 'Pilot', 'Passport'];
@@ -41,15 +42,18 @@
                       {op: 'replace', path: '/field_answers/make', value: make},
                       {op: 'replace', path: '/field_answers/model', value: model},
                   ]
-                  // Simulate a normal delay when looking up information
-                  setTimeout(() => { this.emit(PLUGIN_NAME + '-update-risk', jsonPatch); }, 500);
-                  // this namespaces the event and is important
+                // Simulate a normal delay when looking up information
+                 setTimeout(() => {
+                      this.parent.updateRisk(jsonPatch);
+                      this.parent.showLoadingIndicator('component', false)
+                  }, 500);
+
               } else {
-                  this.emit(PLUGIN_NAME + "-plugin-error", "Please enter a valid 17 character VIN. It is composed of digits and capital letters that act as a unique identifier for the vehicle.");
+                  this.parent.displayErrors("Please enter a valid 17 character VIN. It is composed of digits and capital letters that act as a unique identifier for the vehicle.");
               }
 
           } else {
-              this.emit(PLUGIN_NAME + "-plugin-error", "Please enter a valid 17 character VIN. It is composed of digits and capital letters that act as a unique identifier for the vehicle.");
+              this.parent.displayErrors("Please enter a valid 17 character VIN. It is composed of digits and capital letters that act as a unique identifier for the vehicle.");
           }
       }
       /**

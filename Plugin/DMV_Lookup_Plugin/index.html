@@ -73,6 +73,7 @@
       function lookupDMV(context) {
         let fa = context.rootRiskQuote.risk_state.field_answers;
         if (fa.firstNameNI != '' && fa.lastNameNI != '' && fa.streetAddressNI != '' && fa.cityNI != '' && fa.stateOfNI != '' && fa.zipCodeNI != '') {
+            this.parent.showLoadingIndicator('fullscreen', true);
             // Get Named Insured Info
             var first_name = fa.firstNameNI;
             var last_name = fa.lastNameNI;
@@ -156,35 +157,41 @@
                 }
             }
 
-            async function getQuoteRisks (context) {
-                try {
-                    const request = new BriteCorePluginRequest(this.parent, PLUGIN_NAME);
-                    let url = '/quote/' + context.quote.quote_number  + '/risks/';
-                    const response = await request.makeRequest('get', {'url': url}, 'quote');
-                    console.log(response);
-                } catch (error) {
-                    console.log(error);
-                }
-            }
+            // async function getQuoteRisks (context) {
+            //     try {
+            //         // const request = new BriteCorePluginRequest(this.parent, PLUGIN_NAME);
+            //         let url = context.quote.quote_number + '/risks/';
+            //         const response = await this.parent.request.makeRequest('get', {'url': url}, 'quote');
+            //         console.log(response);
+            //     } catch (error) {
+            //         console.log(error);
+            //     }
+            // }
 
-            const driverRisks = addDriverRisks(context);
-            const vehicleRisks = addVehicleRisks(context);
+            // const driverRisks = addDriverRisks(context);
+            // const vehicleRisks = addVehicleRisks(context);
 
             try {
                 // Add Drivers and Vehicles
-                this.emit(PLUGIN_NAME + "-create-and-update-risk", driverRisks.riskQuotesData);
-                this.emit(PLUGIN_NAME + "-create-and-update-risk", vehicleRisks.riskQuotesData);
+                  const driverRisks = addDriverRisks(context);
+                  this.parent.createAndUpdateRisk(driverRisks.riskQuotesData);
+                  console.log(context.rootRiskQuote);
+
                 // Simulate a 10 second delay in getting data from third party vendor
-                setTimeout(() => {
-                    getQuoteRisks(context);
-                    this.emit(PLUGIN_NAME + "-plugin-message", "DMV Lookup found " + drivers.length + " Drivers and " + vehicles.length + " Vehicles! These have been automatically added to this quote.");
-                }, 10000);
+                  setTimeout(() => {
+                  // getQuoteRisks(context);
+                    const vehicleRisks = addVehicleRisks(context);
+                    this.parent.createAndUpdateRisk(vehicleRisks.riskQuotesData);
+                    console.log(context.rootRiskQuote);
+                    this.parent.displayMessage("DMV Lookup found " + drivers.length + " Drivers and " + vehicles.length + " Vehicles! These have been automatically added to this quote.");
+                    this.parent.showLoadingIndicator('fullscreen', false);
+                  }, 10000);
             } catch (e) {
                 console.log(e);
-                this.emit(PLUGIN_NAME + "-plugin-error", "DMV Lookup encountered a problem.");
+                this.parent.displayErrors("DMV Lookup encountered a problem.");
             }
         } else {
-            this.emit(PLUGIN_NAME + "-plugin-error", "Please enter a first and last name and street address to lookup DMV information.");
+            this.parent.displayErrors("Please enter a first and last name and street address to lookup DMV information.");
         }
       }
       /**
@@ -194,7 +201,7 @@
        * @returns {boolean} False if a button is to be disabled in the ui.
        */
       function visible(context) {
-        return context.riskTypeState.name == "policy";
+        return context.riskTypeState.name == "policy" && context.quote.product_label.includes('Auto');
       }
 
       let plugin = new BriteCorePlugin(PLUGIN_NAME);
